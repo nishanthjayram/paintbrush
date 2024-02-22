@@ -2,7 +2,6 @@ import { Pixmap } from "./Pixmap";
 import { PALETTE } from "./constants";
 
 export type TPalette = typeof PALETTE;
-export type TColor = keyof TPalette;
 
 export type TPos = [number, number];
 

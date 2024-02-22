@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import styles from "./PixmapCanvas.module.css";
 import { Pixmap } from "../../Pixmap";
+import { PALETTE } from "../../constants";
 
 type TProps = React.HTMLAttributes<HTMLCanvasElement> & {
   pixmap: Pixmap;
@@ -21,7 +22,7 @@ const PixmapCanvas = (props: TProps) => {
 
     for (let y = 0; y < pixmap.height; y++) {
       for (let x = 0; x < pixmap.width; x++) {
-        const [r, g, b] = pixmap.getPixel(x, y);
+        const [r, g, b] = PALETTE[pixmap.getPixel(x, y)];
         const imageIndex = (y * pixmap.width + x) * 4;
         imageData[imageIndex] = r;
         imageData[imageIndex + 1] = g;

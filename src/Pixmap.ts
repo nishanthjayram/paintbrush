@@ -1,34 +1,23 @@
-import { PALETTE } from "./constants";
-import { TColor } from "./types";
-
 export class Pixmap {
   pixels: Uint8Array;
   width: number;
   height: number;
 
   constructor(width: number, height: number) {
-    this.pixels = new Uint8Array(width * height * 3).fill(255);
+    this.pixels = new Uint8Array(width * height).fill(15);
     this.width = width;
     this.height = height;
   }
 
-  setPixel(x: number, y: number, color: TColor) {
-    const index = (y * this.width + x) * 3;
-    const rgb = PALETTE[color];
-    this.pixels[index] = rgb[0];
-    this.pixels[index + 1] = rgb[1];
-    this.pixels[index + 2] = rgb[2];
-
+  setPixel(x: number, y: number, colorIndex: number) {
+    const index = y * this.width + x;
+    this.pixels[index] = colorIndex;
     return this;
   }
 
   getPixel(x: number, y: number) {
-    const index = (y * this.width + x) * 3;
-    return [
-      this.pixels[index],
-      this.pixels[index + 1],
-      this.pixels[index + 2],
-    ] as const;
+    const index = y * this.width + x;
+    return this.pixels[index];
   }
 
   drawLine(x0_: number, y0_: number, x1_: number, y1_: number) {
@@ -45,7 +34,7 @@ export class Pixmap {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.setPixel(x0, y0, "darkgreen");
+      this.setPixel(x0, y0, 0);
       if (x0 === x1 && y0 === y1) break;
       const e2 = 2 * err;
       if (e2 >= dy) {
