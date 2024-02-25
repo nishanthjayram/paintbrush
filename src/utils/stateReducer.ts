@@ -6,7 +6,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
       return {
         ...state,
         isDrawing: true,
-        lastPos: action.payload,
+        lastPos: action.lastPos,
       };
     case "mousemove":
       if (!state.isDrawing || !state.lastPos) return state;
@@ -14,10 +14,24 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
         case "pen":
           return {
             ...state,
-            pixmap: state.pixmap
-              .copy()
-              .drawLine(...state.lastPos, ...action.payload),
-            lastPos: action.payload,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .drawLine(...state.lastPos, ...action.lastPos),
+            },
+            lastPos: action.lastPos,
+          };
+        case "line":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawLine(...state.lastPos, ...action.lastPos),
+            },
           };
         default:
           return state;
@@ -27,6 +41,11 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
         ...state,
         isDrawing: false,
         lastPos: null,
+        layers: {
+          ...state.layers,
+          main: state.layers.main.copy().combinePixels(state.layers.preview),
+          preview: state.layers.preview.copy().clear(),
+        },
       };
     case "setTool":
       return {

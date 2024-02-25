@@ -3,12 +3,17 @@ import { PALETTE } from "./constants";
 
 export type TPalette = typeof PALETTE;
 
+export type TLayers = {
+  main: Pixmap;
+  preview: Pixmap;
+};
+
 export type TPos = [number, number];
 
-export type TTool = "pen";
+export type TTool = "pen" | "line";
 
 export type TState = {
-  pixmap: Pixmap;
+  layers: TLayers;
   isDrawing: boolean;
   lastPos: TPos | null;
   tool: TTool;
@@ -17,8 +22,9 @@ export type TState = {
 export type TStateAction =
   | {
       type: "mousedown";
-      payload: TPos;
+      startPos: TPos;
+      lastPos: TPos;
     }
-  | { type: "mousemove"; payload: TPos }
+  | { type: "mousemove"; lastPos: TPos }
   | { type: "mouseup" }
   | { type: "setTool"; payload: TTool };

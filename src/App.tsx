@@ -6,7 +6,10 @@ import { TState } from "./types";
 import { stateReducer } from "./utils/stateReducer";
 
 const initializeState = (): TState => ({
-  pixmap: new Pixmap(640, 442),
+  layers: {
+    main: new Pixmap(640, 442),
+    preview: new Pixmap(640, 442),
+  },
   isDrawing: false,
   lastPos: null,
   tool: "pen",
@@ -18,11 +21,12 @@ function App() {
     <div className={styles.app}>
       <div className={styles.canvasWrapper}>
         <PixmapCanvas
-          pixmap={state.pixmap}
+          layers={state.layers}
           onMouseDown={(e) => {
             dispatch({
               type: "mousedown",
-              payload: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+              startPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
             });
           }}
           onMouseUp={() => {
@@ -31,7 +35,7 @@ function App() {
           onMouseMove={(e) => {
             dispatch({
               type: "mousemove",
-              payload: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
             });
           }}
         />
@@ -42,7 +46,14 @@ function App() {
             dispatch({ type: "setTool", payload: "pen" });
           }}
         >
-          Pen
+          {state.tool === "pen" ? "Pen (selected)" : "Pen"}
+        </button>
+        <button
+          onClick={() => {
+            dispatch({ type: "setTool", payload: "line" });
+          }}
+        >
+          {state.tool === "line" ? "Line (selected)" : "Line"}
         </button>
       </div>
     </div>

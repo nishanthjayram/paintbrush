@@ -3,8 +3,8 @@ export class Pixmap {
   width: number;
   height: number;
 
-  constructor(width: number, height: number) {
-    this.pixels = new Uint8Array(width * height).fill(15);
+  constructor(width: number, height: number, fillColor: number = 0) {
+    this.pixels = new Uint8Array(width * height).fill(fillColor);
     this.width = width;
     this.height = height;
   }
@@ -34,7 +34,7 @@ export class Pixmap {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.setPixel(x0, y0, 0);
+      this.setPixel(x0, y0, 2);
       if (x0 === x1 && y0 === y1) break;
       const e2 = 2 * err;
       if (e2 >= dy) {
@@ -54,5 +54,20 @@ export class Pixmap {
     const copy = new Pixmap(this.width, this.height);
     copy.pixels.set(this.pixels);
     return copy;
+  }
+
+  clear() {
+    this.pixels.fill(0);
+    return this;
+  }
+
+  combinePixels(pixmap: Pixmap) {
+    this.pixels.set(
+      this.pixels.map((el, i) =>
+        pixmap.pixels[i] !== 0 ? pixmap.pixels[i] : el
+      )
+    );
+
+    return this;
   }
 }

@@ -1,4 +1,6 @@
 export const PALETTE = [
+  [255, 255, 255], // Empty
+  [255, 255, 255], // White
   [0, 0, 0], // Black
   [170, 0, 85], // Dark Magenta
   [0, 170, 85], // Dark Cyan
@@ -14,6 +16,4 @@ export const PALETTE = [
   [0, 0, 255], // Blue
   [255, 0, 255], // Magenta
   [0, 255, 255], // Cyan
-  [255, 255, 255], // White
-  [127, 127, 127], // Grey
 ] as const;

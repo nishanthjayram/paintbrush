@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import styles from "./PixmapCanvas.module.css";
-import { Pixmap } from "../../Pixmap";
 import { PALETTE } from "../../constants";
+import { TLayers } from "../../types";
 
 type TProps = React.HTMLAttributes<HTMLCanvasElement> & {
-  pixmap: Pixmap;
+  layers: TLayers;
 };
 const PixmapCanvas = (props: TProps) => {
-  const { pixmap, ...rest } = props;
+  const { layers, ...rest } = props;
 
   const canvas = useRef<HTMLCanvasElement>(null);
 
@@ -18,32 +18,47 @@ const PixmapCanvas = (props: TProps) => {
 
     ctx.imageSmoothingEnabled = false;
 
-    const imageData = ctx.getImageData(0, 0, pixmap.width, pixmap.height).data;
+    const imageData = ctx.getImageData(
+      0,
+      0,
+      layers.main.width,
+      layers.main.height
+    ).data;
 
-    for (let y = 0; y < pixmap.height; y++) {
-      for (let x = 0; x < pixmap.width; x++) {
-        const [r, g, b] = PALETTE[pixmap.getPixel(x, y)];
-        const imageIndex = (y * pixmap.width + x) * 4;
-        imageData[imageIndex] = r;
-        imageData[imageIndex + 1] = g;
-        imageData[imageIndex + 2] = b;
+    for (let y = 0; y < layers.main.height; y++) {
+      for (let x = 0; x < layers.main.width; x++) {
+        const imageIndex = (y * layers.main.width + x) * 4;
+
+        const mainRGB = PALETTE[layers.main.getPixel(x, y)];
+        imageData[imageIndex] = mainRGB[0];
+        imageData[imageIndex + 1] = mainRGB[1];
+        imageData[imageIndex + 2] = mainRGB[2];
         imageData[imageIndex + 3] = 255;
+
+        const previewPixel = layers.preview.getPixel(x, y);
+        if (previewPixel > 0) {
+          const previewRGB = PALETTE[previewPixel];
+          imageData[imageIndex] = previewRGB[0];
+          imageData[imageIndex + 1] = previewRGB[1];
+          imageData[imageIndex + 2] = previewRGB[2];
+          imageData[imageIndex + 3] = 255;
+        }
       }
     }
 
     ctx.putImageData(
-      new ImageData(imageData, pixmap.width, pixmap.height),
+      new ImageData(imageData, layers.main.width, layers.main.height),
       0,
       0
     );
-  }, [pixmap]);
+  }, [layers]);
 
   return (
     <canvas
       className={styles.canvas}
       ref={canvas}
-      width={pixmap.width}
-      height={pixmap.height}
+      width={layers.main.width}
+      height={layers.main.height}
       {...rest}
     />
   );
