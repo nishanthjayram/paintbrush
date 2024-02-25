@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useReducer } from "react";
+import styles from "./App.module.css";
+import { Pixmap } from "./Pixmap";
+import PixmapCanvas from "./components/PixmapCanvas/PixmapCanvas";
+import { TState } from "./types";
+import { stateReducer } from "./utils/stateReducer";
+
+const initializeState = (): TState => ({
+  layers: {
+    main: new Pixmap(640, 442),
+    preview: new Pixmap(640, 442),
+  },
+  isDrawing: false,
+  lastPos: null,
+  tool: "pen",
+});
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const [state, dispatch] = useReducer(stateReducer, initializeState());
   return (
-    <>
+    <div className={styles.app}>
+      <div className={styles.canvasWrapper}>
+        <PixmapCanvas
+          layers={state.layers}
+          onMouseDown={(e) => {
+            dispatch({
+              type: "mousedown",
+              startPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+            });
+          }}
+          onMouseUp={() => {
+            dispatch({ type: "mouseup" });
+          }}
+          onMouseMove={(e) => {
+            dispatch({
+              type: "mousemove",
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+            });
+          }}
+        />
+      </div>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button
+          onClick={() => {
+            dispatch({ type: "setTool", payload: "pen" });
+          }}
+        >
+          {state.tool === "pen" ? "Pen (selected)" : "Pen"}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button
+          onClick={() => {
+            dispatch({ type: "setTool", payload: "line" });
+          }}
+        >
+          {state.tool === "line" ? "Line (selected)" : "Line"}
+        </button>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </div>
+  );
 }
 
-export default App
+export default App;
