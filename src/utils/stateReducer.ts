@@ -18,7 +18,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               ...state.layers,
               main: state.layers.main
                 .copy()
-                .drawLine(...state.lastPos, ...action.lastPos),
+                .drawLine(...state.lastPos, ...action.lastPos, state.fillColor),
             },
             lastPos: action.lastPos,
           };
@@ -30,7 +30,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               preview: state.layers.preview
                 .copy()
                 .clear()
-                .drawLine(...state.lastPos, ...action.lastPos),
+                .drawLine(...state.lastPos, ...action.lastPos, state.fillColor),
             },
           };
         default:
@@ -51,6 +51,21 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
       return {
         ...state,
         tool: action.payload,
+      };
+    case "setPalette":
+      return {
+        ...state,
+        palette: action.payload,
+      };
+    case "setFillColor":
+      return {
+        ...state,
+        fillColor: action.payload,
+      };
+    case "setBorderColor":
+      return {
+        ...state,
+        borderColor: action.payload,
       };
     default:
       return state;

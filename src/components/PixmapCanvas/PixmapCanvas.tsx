@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import styles from "./PixmapCanvas.module.css";
-import { PALETTE } from "../../constants";
+import { COLOR_PALETTE } from "../../constants";
 import { TLayers } from "../../types";
 
 type TProps = React.HTMLAttributes<HTMLCanvasElement> & {
@@ -29,7 +29,7 @@ const PixmapCanvas = (props: TProps) => {
       for (let x = 0; x < layers.main.width; x++) {
         const imageIndex = (y * layers.main.width + x) * 4;
 
-        const mainRGB = PALETTE[layers.main.getPixel(x, y)];
+        const mainRGB = COLOR_PALETTE[layers.main.getPixel(x, y)];
         imageData[imageIndex] = mainRGB[0];
         imageData[imageIndex + 1] = mainRGB[1];
         imageData[imageIndex + 2] = mainRGB[2];
@@ -37,7 +37,7 @@ const PixmapCanvas = (props: TProps) => {
 
         const previewPixel = layers.preview.getPixel(x, y);
         if (previewPixel > 0) {
-          const previewRGB = PALETTE[previewPixel];
+          const previewRGB = COLOR_PALETTE[previewPixel];
           imageData[imageIndex] = previewRGB[0];
           imageData[imageIndex + 1] = previewRGB[1];
           imageData[imageIndex + 2] = previewRGB[2];

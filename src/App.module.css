@@ -5,6 +5,12 @@
   justify-content: center;
 }
 
+.middle {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+}
+
 .canvasWrapper {
   position: relative;
   width: 640px;

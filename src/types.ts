@@ -1,7 +1,5 @@
 import { Pixmap } from "./Pixmap";
-import { PALETTE } from "./constants";
-
-export type TPalette = typeof PALETTE;
+import { TPalette, TTool } from "./constants";
 
 export type TLayers = {
   main: Pixmap;
@@ -10,13 +8,14 @@ export type TLayers = {
 
 export type TPos = [number, number];
 
-export type TTool = "pen" | "line";
-
 export type TState = {
   layers: TLayers;
   isDrawing: boolean;
   lastPos: TPos | null;
   tool: TTool;
+  palette: TPalette;
+  fillColor: number;
+  borderColor: number;
 };
 
 export type TStateAction =
@@ -27,4 +26,12 @@ export type TStateAction =
     }
   | { type: "mousemove"; lastPos: TPos }
   | { type: "mouseup" }
-  | { type: "setTool"; payload: TTool };
+  | { type: "setTool"; payload: TTool }
+  | { type: "setPalette"; payload: TPalette }
+  | { type: "setFillColor"; payload: number }
+  | { type: "setBorderColor"; payload: number };
+
+export type TReducerState = {
+  state: TState;
+  dispatch: React.Dispatch<TStateAction>;
+};

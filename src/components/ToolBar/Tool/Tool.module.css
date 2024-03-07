@@ -1,0 +1,12 @@
+.tool {
+  width: 30px;
+  height: 30px;
+  margin: 0.5px;
+  background-color: #ffffff;
+  border: 1px solid black;
+  color: black;
+}
+
+.active {
+  background-color: #ffa500;
+}

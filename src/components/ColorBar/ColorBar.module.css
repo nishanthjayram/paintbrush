@@ -1,0 +1,29 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  background-color: black;
+}
+
+.colorbar {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 2px 2px;
+  border: 1px solid black;
+}
+
+.borderColor {
+  position: relative;
+  display: flex;
+  width: 80px;
+  height: 40px;
+  border: 1px solid white;
+  outline: 1px solid black;
+  align-items: center;
+  justify-content: center;
+}
+
+.fillColor {
+  width: 42px;
+  height: 20px;
+  border: 1px solid white;
+}

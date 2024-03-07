@@ -3,15 +3,15 @@ export class Pixmap {
   width: number;
   height: number;
 
-  constructor(width: number, height: number, fillColor: number = 0) {
-    this.pixels = new Uint8Array(width * height).fill(fillColor);
+  constructor(width: number, height: number, backgroundColor: number = 0) {
+    this.pixels = new Uint8Array(width * height).fill(backgroundColor);
     this.width = width;
     this.height = height;
   }
 
-  setPixel(x: number, y: number, colorIndex: number) {
+  setPixel(x: number, y: number, color: number) {
     const index = y * this.width + x;
-    this.pixels[index] = colorIndex;
+    this.pixels[index] = color;
     return this;
   }
 
@@ -20,7 +20,7 @@ export class Pixmap {
     return this.pixels[index];
   }
 
-  drawLine(x0_: number, y0_: number, x1_: number, y1_: number) {
+  drawLine(x0_: number, y0_: number, x1_: number, y1_: number, color: number) {
     let x0 = Math.floor(x0_);
     let y0 = Math.floor(y0_);
     const x1 = Math.floor(x1_);
@@ -34,7 +34,7 @@ export class Pixmap {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.setPixel(x0, y0, 2);
+      this.setPixel(x0, y0, color);
       if (x0 === x1 && y0 === y1) break;
       const e2 = 2 * err;
       if (e2 >= dy) {
