@@ -8,5 +8,5 @@
 }
 
 .active {
-  background-color: #ffa500;
+  filter: invert(100%);
 }

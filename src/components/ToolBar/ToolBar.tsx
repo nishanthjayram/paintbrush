@@ -8,10 +8,12 @@ type TProps = TReducerState & {
 };
 const ToolBar = ({ tools, state, dispatch }: TProps) => {
   return (
-    <div className={styles.toolbar}>
-      {tools.map((tool) => (
-        <Tool key={tool} tool={tool} state={state} dispatch={dispatch} />
-      ))}
+    <div className={styles.wrapper}>
+      <div className={styles.toolbar}>
+        {tools.map((tool) => (
+          <Tool key={tool} tool={tool} state={state} dispatch={dispatch} />
+        ))}
+      </div>
     </div>
   );
 };
