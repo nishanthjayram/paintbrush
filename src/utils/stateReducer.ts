@@ -1,4 +1,5 @@
 import { TState, TStateAction } from "../types";
+import { getMidpoint } from "./getMidpoint";
 
 export const stateReducer = (state: TState, action: TStateAction): TState => {
   switch (action.type) {
@@ -31,6 +32,58 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
                 .copy()
                 .clear()
                 .drawLine(...state.lastPos, ...action.lastPos, state.fillColor),
+            },
+          };
+        case "rectangle": {
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawRectangle(
+                  ...state.lastPos,
+                  ...action.lastPos,
+                  state.fillColor
+                ),
+            },
+          };
+        }
+        case "filledRectangle":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledRectangle(
+                  ...state.lastPos,
+                  ...action.lastPos,
+                  state.fillColor,
+                  state.borderColor
+                ),
+            },
+          };
+        case "ellipse":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawEllipse(
+                  ...getMidpoint(state.lastPos, action.lastPos),
+                  Math.floor(
+                    Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
+                  ),
+                  Math.floor(
+                    Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
+                  ),
+                  state.fillColor
+                ),
             },
           };
         default:
