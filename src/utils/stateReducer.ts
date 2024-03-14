@@ -19,7 +19,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               ...state.layers,
               main: state.layers.main
                 .copy()
-                .drawLine(...state.lastPos, ...action.lastPos, state.fillColor),
+                .drawLine(state.lastPos, action.lastPos, state.fillColor),
             },
             lastPos: action.lastPos,
           };
@@ -31,7 +31,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               preview: state.layers.preview
                 .copy()
                 .clear()
-                .drawLine(...state.lastPos, ...action.lastPos, state.fillColor),
+                .drawLine(state.lastPos, action.lastPos, state.fillColor),
             },
           };
         case "rectangle": {
@@ -42,11 +42,7 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               preview: state.layers.preview
                 .copy()
                 .clear()
-                .drawRectangle(
-                  ...state.lastPos,
-                  ...action.lastPos,
-                  state.fillColor
-                ),
+                .drawRectangle(state.lastPos, action.lastPos, state.fillColor),
             },
           };
         }
@@ -59,8 +55,8 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
                 .copy()
                 .clear()
                 .drawFilledRectangle(
-                  ...state.lastPos,
-                  ...action.lastPos,
+                  state.lastPos,
+                  action.lastPos,
                   state.fillColor,
                   state.borderColor
                 ),
@@ -75,13 +71,15 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
                 .copy()
                 .clear()
                 .drawEllipse(
-                  ...getMidpoint(state.lastPos, action.lastPos),
-                  Math.floor(
-                    Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
-                  ),
-                  Math.floor(
-                    Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
-                  ),
+                  getMidpoint(state.lastPos, action.lastPos),
+                  [
+                    Math.floor(
+                      Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
+                    ),
+                    Math.floor(
+                      Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
+                    ),
+                  ],
                   state.fillColor
                 ),
             },

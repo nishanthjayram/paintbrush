@@ -1,3 +1,5 @@
+import { TPos } from "./types";
+
 export class Pixmap {
   pixels: Uint8Array;
   width: number;
@@ -9,18 +11,18 @@ export class Pixmap {
     this.height = height;
   }
 
-  setPixel(x: number, y: number, color: number) {
+  setPixel([x, y]: TPos, color: number) {
     const index = y * this.width + x;
     this.pixels[index] = color;
     return this;
   }
 
-  getPixel(x: number, y: number) {
+  getPixel([x, y]: TPos) {
     const index = y * this.width + x;
     return this.pixels[index];
   }
 
-  drawLine(x0_: number, y0_: number, x1_: number, y1_: number, color: number) {
+  drawLine([x0_, y0_]: TPos, [x1_, y1_]: TPos, color: number) {
     let x0 = Math.floor(x0_);
     let y0 = Math.floor(y0_);
     const x1 = Math.floor(x1_);
@@ -34,7 +36,7 @@ export class Pixmap {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      this.setPixel(x0, y0, color);
+      this.setPixel([x0, y0], color);
       if (x0 === x1 && y0 === y1) break;
       const e2 = 2 * err;
       if (e2 >= dy) {
@@ -50,48 +52,34 @@ export class Pixmap {
     return this;
   }
 
-  drawRectangle(
-    x0: number,
-    y0: number,
-    x1: number,
-    y1: number,
-    borderColor: number
-  ) {
-    this.drawLine(x0, y0, x1, y0, borderColor);
-    this.drawLine(x1, y0, x1, y1, borderColor);
-    this.drawLine(x1, y1, x0, y1, borderColor);
-    this.drawLine(x0, y1, x0, y0, borderColor);
+  drawRectangle([x0, y0]: TPos, [x1, y1]: TPos, borderColor: number) {
+    this.drawLine([x0, y0], [x1, y0], borderColor);
+    this.drawLine([x1, y0], [x1, y1], borderColor);
+    this.drawLine([x1, y1], [x0, y1], borderColor);
+    this.drawLine([x0, y1], [x0, y0], borderColor);
 
     return this;
   }
 
   drawFilledRectangle(
-    x0: number,
-    y0: number,
-    x1: number,
-    y1: number,
+    [x0, y0]: TPos,
+    [x1, y1]: TPos,
     fillColor: number,
     borderColor: number
   ) {
-    this.drawRectangle(x0, y0, x1, y1, borderColor);
+    this.drawRectangle([x0, y0], [x1, y1], borderColor);
 
     const [xMin, xMax] = x0 < x1 ? [x0, x1] : [x1, x0];
     const [yMin, yMax] = y0 < y1 ? [y0, y1] : [y1, y0];
 
     for (let y = yMin + 1; y < yMax; y++) {
-      this.drawLine(xMin + 1, y, xMax - 1, y, fillColor);
+      this.drawLine([xMin + 1, y], [xMax - 1, y], fillColor);
     }
 
     return this;
   }
 
-  drawEllipse(
-    x0: number,
-    y0: number,
-    rx: number,
-    ry: number,
-    borderColor: number
-  ) {
+  drawEllipse([x0, y0]: TPos, [rx, ry]: TPos, borderColor: number) {
     let [x, y] = [0, ry];
 
     let d1 = ry * ry - rx * rx * ry + 0.25 * rx * rx;
@@ -99,10 +87,10 @@ export class Pixmap {
     let dy = 2 * rx * rx * y;
 
     while (dx < dy) {
-      this.setPixel(x + x0, y + y0, borderColor);
-      this.setPixel(-x + x0, y + y0, borderColor);
-      this.setPixel(x + x0, -y + y0, borderColor);
-      this.setPixel(-x + x0, -y + y0, borderColor);
+      this.setPixel([x + x0, y + y0], borderColor);
+      this.setPixel([-x + x0, y + y0], borderColor);
+      this.setPixel([x + x0, -y + y0], borderColor);
+      this.setPixel([-x + x0, -y + y0], borderColor);
 
       if (d1 < 0) {
         x++;
@@ -123,10 +111,10 @@ export class Pixmap {
       rx * rx * ry * ry;
 
     while (y >= 0) {
-      this.setPixel(x + x0, y + y0, borderColor);
-      this.setPixel(-x + x0, y + y0, borderColor);
-      this.setPixel(x + x0, -y + y0, borderColor);
-      this.setPixel(-x + x0, -y + y0, borderColor);
+      this.setPixel([x + x0, y + y0], borderColor);
+      this.setPixel([-x + x0, y + y0], borderColor);
+      this.setPixel([x + x0, -y + y0], borderColor);
+      this.setPixel([-x + x0, -y + y0], borderColor);
 
       if (d2 > 0) {
         y--;
