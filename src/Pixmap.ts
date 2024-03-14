@@ -1,25 +1,31 @@
+import { BitSet } from "./classes/BitSet";
 import { TPos } from "./types";
+import { checkPos } from "./utils/checkPos";
 
 export class Pixmap {
   pixels: Uint8Array;
   width: number;
   height: number;
+  visited: BitSet;
 
   constructor(width: number, height: number, backgroundColor: number = 0) {
     this.pixels = new Uint8Array(width * height).fill(backgroundColor);
     this.width = width;
     this.height = height;
+    this.visited = new BitSet(width * height);
   }
 
-  setPixel([x, y]: TPos, color: number) {
-    const index = y * this.width + x;
-    this.pixels[index] = color;
+  setPixel(pos: TPos, color: number) {
+    this.pixels[this.posToIndex(pos)] = color;
     return this;
   }
 
-  getPixel([x, y]: TPos) {
-    const index = y * this.width + x;
-    return this.pixels[index];
+  getPixel(pos: TPos) {
+    return this.pixels[this.posToIndex(pos)];
+  }
+
+  posToIndex([x, y]: TPos) {
+    return y * this.width + x;
   }
 
   drawLine([x0_, y0_]: TPos, [x1_, y1_]: TPos, color: number) {
@@ -127,6 +133,50 @@ export class Pixmap {
         dy = dy - 2 * rx * rx;
         d2 = d2 + dx - dy + rx * rx;
       }
+    }
+
+    return this;
+  }
+
+  fill(start: TPos, fillColor: number) {
+    const targetColor = this.getPixel(start);
+    if (fillColor === targetColor) return this;
+
+    const queue: TPos[] = [start];
+    while (queue.length > 0) {
+      const pos = queue.shift();
+      if (!pos) continue;
+
+      const [x, y] = pos;
+      const index = this.posToIndex([x, y]);
+
+      if (
+        !checkPos([x, y], this.width, this.height) ||
+        this.getPixel([x, y]) !== targetColor ||
+        this.visited.check(index)
+      ) {
+        continue;
+      }
+
+      this.setPixel([x, y], fillColor);
+      this.visited.set(index);
+
+      const neighbors: TPos[] = [
+        [x + 1, y],
+        [x - 1, y],
+        [x, y + 1],
+        [x, y - 1],
+        [x + 1, y + 1],
+        [x - 1, y - 1],
+        [x - 1, y + 1],
+        [x + 1, y - 1],
+      ];
+      neighbors.forEach((p) => {
+        const idx = this.posToIndex(p);
+        if (!this.visited.check(idx)) {
+          queue.push(p);
+        }
+      });
     }
 
     return this;
