@@ -21,7 +21,14 @@ export const WINDOWS_PALETTE = [
   [255, 255, 255], // White
 ] as const;
 
-export const TOOLS = ["pen", "line", "rectangle", "filledRectangle", "ellipse"];
+export const TOOLS = [
+  "fill",
+  "pen",
+  "line",
+  "rectangle",
+  "filledRectangle",
+  "ellipse",
+];
 
 export const COLOR_PALETTE: TPalette = [
   [255, 255, 255], // Empty

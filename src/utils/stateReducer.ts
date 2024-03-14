@@ -4,11 +4,24 @@ import { getMidpoint } from "./getMidpoint";
 export const stateReducer = (state: TState, action: TStateAction): TState => {
   switch (action.type) {
     case "mousedown":
-      return {
-        ...state,
-        isDrawing: true,
-        lastPos: action.lastPos,
-      };
+      switch (state.tool) {
+        case "fill":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .fill(action.lastPos, state.fillColor),
+            },
+          };
+        default:
+          return {
+            ...state,
+            isDrawing: true,
+            lastPos: action.lastPos,
+          };
+      }
     case "mousemove":
       if (!state.isDrawing || !state.lastPos) return state;
       switch (state.tool) {
