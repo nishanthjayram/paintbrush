@@ -22,6 +22,8 @@ export const WINDOWS_PALETTE = [
 ] as const;
 
 export const TOOLS = [
+  "colorEraser",
+  "eraser",
   "fill",
   "pen",
   "line",

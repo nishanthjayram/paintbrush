@@ -36,6 +36,28 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
             },
             lastPos: action.lastPos,
           };
+        case "eraser":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .erase(state.lastPos, action.lastPos),
+            },
+            lastPos: action.lastPos,
+          };
+        case "colorEraser":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .erase(state.lastPos, action.lastPos, state.fillColor),
+            },
+            lastPos: action.lastPos,
+          };
         case "line":
           return {
             ...state,
