@@ -1,6 +1,7 @@
 import { BitSet } from "./classes/BitSet";
 import { TPos } from "./types";
 import { checkPos } from "./utils/checkPos";
+import { getEllipse } from "./utils/getEllipse";
 import { getLine } from "./utils/getLine";
 
 export class Pixmap {
@@ -81,52 +82,13 @@ export class Pixmap {
   }
 
   drawEllipse([x0, y0]: TPos, [rx, ry]: TPos, borderColor: number) {
-    let [x, y] = [0, ry];
-
-    let d1 = ry * ry - rx * rx * ry + 0.25 * rx * rx;
-    let dx = 2 * ry * ry * x;
-    let dy = 2 * rx * rx * y;
-
-    while (dx < dy) {
-      this.setPixel([x + x0, y + y0], borderColor);
-      this.setPixel([-x + x0, y + y0], borderColor);
-      this.setPixel([x + x0, -y + y0], borderColor);
-      this.setPixel([-x + x0, -y + y0], borderColor);
-
-      if (d1 < 0) {
-        x++;
-        dx = dx + 2 * ry * ry;
-        d1 = d1 + dx + ry * ry;
-      } else {
-        x++;
-        y--;
-        dx = dx + 2 * ry * ry;
-        dy = dy - 2 * rx * rx;
-        d1 = d1 + dx - dy + ry * ry;
-      }
-    }
-
-    let d2 =
-      ry * ry * ((x + 0.5) * (x + 0.5)) +
-      rx * rx * ((y - 1) * (y - 1)) -
-      rx * rx * ry * ry;
-
-    while (y >= 0) {
-      this.setPixel([x + x0, y + y0], borderColor);
-      this.setPixel([-x + x0, y + y0], borderColor);
-      this.setPixel([x + x0, -y + y0], borderColor);
-      this.setPixel([-x + x0, -y + y0], borderColor);
-
-      if (d2 > 0) {
-        y--;
-        dy = dy - 2 * rx * rx;
-        d2 = d2 + rx * rx - dy;
-      } else {
-        y--;
-        x++;
-        dx = dx + 2 * ry * ry;
-        dy = dy - 2 * rx * rx;
-        d2 = d2 + dx - dy + rx * rx;
+    for (const pos of getEllipse([x0, y0], rx, ry)) {
+      if (
+        checkPos(pos, this.width, this.height) &&
+        !this.visited.check(this.posToIndex(pos))
+      ) {
+        this.setPixel(pos, borderColor);
+        this.visited.set(this.posToIndex(pos));
       }
     }
 
@@ -161,10 +123,6 @@ export class Pixmap {
         [x - 1, y],
         [x, y + 1],
         [x, y - 1],
-        [x + 1, y + 1],
-        [x - 1, y - 1],
-        [x - 1, y + 1],
-        [x + 1, y - 1],
       ];
       neighbors.forEach((p) => {
         const idx = this.posToIndex(p);
