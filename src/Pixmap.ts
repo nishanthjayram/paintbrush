@@ -95,6 +95,25 @@ export class Pixmap {
     return this;
   }
 
+  drawFilledEllipse(
+    [x0, y0]: TPos,
+    [rx, ry]: TPos,
+    fillColor: number,
+    borderColor: number
+  ) {
+    this.drawEllipse([x0, y0], [rx, ry], borderColor);
+
+    for (let y = -ry; y <= ry; y++) {
+      const x = Math.round(rx * Math.sqrt(1 - (y * y) / (ry * ry)));
+      for (let i = x0 - x; i <= x0 + x; i++) {
+        const pos: TPos = [i, y0 + y];
+        if (this.getPixel(pos) !== borderColor) this.setPixel(pos, fillColor);
+      }
+    }
+
+    return this;
+  }
+
   fill(start: TPos, fillColor: number) {
     const targetColor = this.getPixel(start);
     if (fillColor === targetColor) return this;

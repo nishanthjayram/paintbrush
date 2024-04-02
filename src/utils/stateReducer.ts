@@ -119,6 +119,29 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
                 ),
             },
           };
+        case "filledEllipse":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledEllipse(
+                  getMidpoint(state.lastPos, action.lastPos),
+                  [
+                    Math.floor(
+                      Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
+                    ),
+                    Math.floor(
+                      Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
+                    ),
+                  ],
+                  state.fillColor,
+                  state.borderColor
+                ),
+            },
+          };
         default:
           return state;
       }

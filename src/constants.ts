@@ -30,6 +30,7 @@ export const TOOLS = [
   "rectangle",
   "filledRectangle",
   "ellipse",
+  "filledEllipse",
 ];
 
 export const COLOR_PALETTE: TPalette = [
