@@ -30,16 +30,25 @@ export class Pixmap {
   }
 
   drawLine([x0, y0]: TPos, [x1, y1]: TPos, color: number) {
-    getLine([x0, y0], [x1, y1]).forEach((pos) => this.setPixel(pos, color));
+    for (const pos of getLine([x0, y0], [x1, y1])) {
+      if (
+        checkPos(pos, this.width, this.height) &&
+        !this.visited.check(this.posToIndex(pos))
+      ) {
+        this.setPixel(pos, color);
+        this.visited.set(this.posToIndex(pos));
+      }
+    }
+
     return this;
   }
 
   erase([x0, y0]: TPos, [x1, y1]: TPos, color?: number) {
-    getLine([x0, y0], [x1, y1]).forEach((pos) => {
+    for (const pos of getLine([x0, y0], [x1, y1])) {
       if (color === undefined || this.getPixel(pos) === color) {
         this.setPixel(pos, 0);
       }
-    });
+    }
     return this;
   }
 
@@ -63,10 +72,11 @@ export class Pixmap {
     const [xMin, xMax] = x0 < x1 ? [x0, x1] : [x1, x0];
     const [yMin, yMax] = y0 < y1 ? [y0, y1] : [y1, y0];
 
-    for (let y = yMin + 1; y < yMax; y++) {
-      this.drawLine([xMin + 1, y], [xMax - 1, y], fillColor);
+    for (let x = xMin + 1; x < xMax; x++) {
+      for (let y = yMin + 1; y < yMax; y++) {
+        this.setPixel([x, y], fillColor);
+      }
     }
-
     return this;
   }
 
