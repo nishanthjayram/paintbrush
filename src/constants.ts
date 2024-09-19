@@ -26,11 +26,16 @@ export const TOOLS = [
   "eraser",
   "fill",
   "pen",
+  "bezier",
   "line",
   "rectangle",
   "filledRectangle",
+  "roundedRectangle",
+  "filledRoundedRectangle",
   "ellipse",
   "filledEllipse",
+  "polygon",
+  "filledPolygon",
 ];
 
 export const COLOR_PALETTE: TPalette = [
