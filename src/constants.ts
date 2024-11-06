@@ -22,20 +22,20 @@ export const WINDOWS_PALETTE = [
 ] as const;
 
 export const TOOLS = [
-  "colorEraser",
-  "eraser",
+  // "colorEraser",
+  // "eraser",
   "fill",
   "pen",
-  "bezier",
+  // "bezier",
   "line",
   "rectangle",
   "filledRectangle",
-  "roundedRectangle",
-  "filledRoundedRectangle",
+  // "roundedRectangle",
+  // "filledRoundedRectangle",
   "ellipse",
   "filledEllipse",
-  "polygon",
-  "filledPolygon",
+  // "polygon",
+  // "filledPolygon",
 ];
 
 export const COLOR_PALETTE: TPalette = [
