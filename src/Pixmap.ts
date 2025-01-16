@@ -1,50 +1,89 @@
 import { BitSet } from "./classes/BitSet";
 import { TPos } from "./types";
-import { checkPos } from "./utils/checkPos";
-import { getEllipse } from "./utils/getEllipse";
-import { getLine } from "./utils/getLine";
+import { getEllipse, getLine } from "./utils/shapes";
 
 export class Pixmap {
-  pixels: Uint8Array;
-  width: number;
-  height: number;
-  visited: BitSet;
+  readonly pixels: Uint8ClampedArray;
+  readonly width: number;
+  readonly height: number;
+  private readonly stride: number;
+  private readonly visited: BitSet;
 
   constructor(width: number, height: number, backgroundColor: number = 0) {
-    this.pixels = new Uint8Array(width * height).fill(backgroundColor);
     this.width = width;
     this.height = height;
+    this.stride = width;
+    this.pixels = new Uint8ClampedArray(width * height).fill(backgroundColor);
     this.visited = new BitSet(width * height);
   }
 
-  setPixel(pos: TPos, color: number) {
+  /**
+   * Converts a position [x, y] to an index in the Pixmap's pixel array.
+   * @param param0 The position [x, y] to convert.
+   * @returns The index of the position in the pixel array.
+   */
+  private posToIndex([x, y]: TPos): number {
+    return y * this.stride + x;
+  }
+
+  /**
+   * Checks if a given position is within the bounds of the Pixmap.
+   * @param param0 The position [x, y] to check.
+   * @returns True if the position is within the bounds of the Pixmap.
+   */
+  private checkPos([x, y]: TPos): boolean {
+    return x >= 0 && x < this.width && y >= 0 && y < this.height;
+  }
+
+  /**
+   * Sets the color of a pixel at a given position.
+   * @param pos The position [x, y] to set the pixel color.
+   * @param color The color to set the pixel to.
+   */
+  private setPixel(pos: TPos, color: number) {
     this.pixels[this.posToIndex(pos)] = color;
-    return this;
   }
 
+  /**
+   * Gets the color of a pixel at a given position.
+   * @param pos The position [x, y] to get the pixel color from.
+   * @returns The color of the pixel at the given position.
+   */
   getPixel(pos: TPos) {
-    return this.pixels[this.posToIndex(pos)];
+    const [x, y] = pos;
+    if (this.checkPos([x, y])) {
+      return this.pixels[this.posToIndex([x, y])];
+    }
+    return 0;
   }
 
-  posToIndex([x, y]: TPos) {
-    return y * this.width + x;
-  }
-
-  drawLine([x0, y0]: TPos, [x1, y1]: TPos, color: number) {
+  /**
+   * Draws a line between two points.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The ending position [x1, y1].
+   * @param color The color of the line.
+   * @returns The original Pixmap with the line drawn.
+   */
+  drawLine([x0, y0]: TPos, [x1, y1]: TPos, color: number): this {
     for (const pos of getLine([x0, y0], [x1, y1])) {
-      if (
-        checkPos(pos, this.width, this.height) &&
-        !this.visited.check(this.posToIndex(pos))
-      ) {
+      if (!this.checkPos(pos)) continue;
+      const index = this.posToIndex(pos);
+      if (!this.visited.check(index)) {
         this.setPixel(pos, color);
-        this.visited.set(this.posToIndex(pos));
+        this.visited.set(index);
       }
     }
-
     return this;
   }
 
-  erase([x0, y0]: TPos, [x1, y1]: TPos, color?: number) {
+  /**
+   * Erases a line between two points.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The ending position [x1, y1].
+   * @param color The color to erase. If not provided, erases all colors.
+   * @returns The original Pixmap with the line erased.
+   */
+  erase([x0, y0]: TPos, [x1, y1]: TPos, color?: number): this {
     for (const pos of getLine([x0, y0], [x1, y1])) {
       if (color === undefined || this.getPixel(pos) === color) {
         this.setPixel(pos, 0);
@@ -53,48 +92,74 @@ export class Pixmap {
     return this;
   }
 
-  drawRectangle([x0, y0]: TPos, [x1, y1]: TPos, borderColor: number) {
-    this.drawLine([x0, y0], [x1, y0], borderColor);
-    this.drawLine([x1, y0], [x1, y1], borderColor);
-    this.drawLine([x1, y1], [x0, y1], borderColor);
-    this.drawLine([x0, y1], [x0, y0], borderColor);
-
-    return this;
+  /**
+   * Draws a rectangle with a border.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The ending position [x1, y1].
+   * @param borderColor The color of the rectangle border.
+   * @returns The original Pixmap with the rectangle.
+   */
+  drawRectangle([x0, y0]: TPos, [x1, y1]: TPos, borderColor: number): this {
+    return this.drawLine([x0, y0], [x1, y0], borderColor)
+      .drawLine([x1, y0], [x1, y1], borderColor)
+      .drawLine([x1, y1], [x0, y1], borderColor)
+      .drawLine([x0, y1], [x0, y0], borderColor);
   }
 
+  /**
+   * Draws a filled rectangle with a border.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The ending position [x1, y1].
+   * @param fillColor The color to fill the rectangle with.
+   * @param borderColor The color of the rectangle border.
+   * @returns The original Pixmap with the filled rectangle.
+   */
   drawFilledRectangle(
     [x0, y0]: TPos,
     [x1, y1]: TPos,
     fillColor: number,
     borderColor: number
-  ) {
-    this.drawRectangle([x0, y0], [x1, y1], borderColor);
-
+  ): this {
     const [xMin, xMax] = x0 < x1 ? [x0, x1] : [x1, x0];
     const [yMin, yMax] = y0 < y1 ? [y0, y1] : [y1, y0];
 
-    for (let x = xMin + 1; x < xMax; x++) {
-      for (let y = yMin + 1; y < yMax; y++) {
-        this.setPixel([x, y], fillColor);
-      }
+    this.drawRectangle([xMin, yMin], [xMax, yMax], borderColor);
+
+    for (let y = yMin + 1; y < yMax; y++) {
+      const startIndex = this.posToIndex([xMin + 1, y]);
+      const endIndex = this.posToIndex([xMax, y]);
+      this.pixels.fill(fillColor, startIndex, endIndex);
     }
     return this;
   }
 
+  /**
+   * Draws an ellipse with a border.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The radii [rx, ry].
+   * @param borderColor The color of the ellipse border.
+   * @returns The original Pixmap with the ellipse.
+   */
   drawEllipse([x0, y0]: TPos, [rx, ry]: TPos, borderColor: number) {
     for (const pos of getEllipse([x0, y0], rx, ry)) {
-      if (
-        checkPos(pos, this.width, this.height) &&
-        !this.visited.check(this.posToIndex(pos))
-      ) {
+      if (!this.checkPos(pos)) continue;
+      const index = this.posToIndex(pos);
+      if (!this.visited.check(index)) {
         this.setPixel(pos, borderColor);
-        this.visited.set(this.posToIndex(pos));
+        this.visited.set(index);
       }
     }
-
     return this;
   }
 
+  /**
+   * Draws an ellipse filled with a new color.
+   * @param param0 The starting position [x0, y0].
+   * @param param1 The radii [rx, ry].
+   * @param fillColor The color to fill the ellipse with.
+   * @param borderColor The color of the ellipse border.
+   * @returns The original Pixmap with the filled ellipse.
+   */
   drawFilledEllipse(
     [x0, y0]: TPos,
     [rx, ry]: TPos,
@@ -102,7 +167,6 @@ export class Pixmap {
     borderColor: number
   ) {
     this.drawEllipse([x0, y0], [rx, ry], borderColor);
-
     for (let y = -ry; y <= ry; y++) {
       const x = Math.round(rx * Math.sqrt(1 - (y * y) / (ry * ry)));
       for (let i = x0 - x; i <= x0 + x; i++) {
@@ -114,6 +178,12 @@ export class Pixmap {
     return this;
   }
 
+  /**
+   * Fills a contiguous area of the Pixmap with a new color.
+   * @param start The starting position [x0, y0].
+   * @param fillColor The color to fill the area with.
+   * @returns The original Pixmap with the filled area.
+   */
   fill(start: TPos, fillColor: number) {
     const targetColor = this.getPixel(start);
     if (fillColor === targetColor) return this;
@@ -127,7 +197,7 @@ export class Pixmap {
       const index = this.posToIndex([x, y]);
 
       if (
-        !checkPos([x, y], this.width, this.height) ||
+        !this.checkPos([x, y]) ||
         this.getPixel([x, y]) !== targetColor ||
         this.visited.check(index)
       ) {
@@ -154,6 +224,10 @@ export class Pixmap {
     return this;
   }
 
+  /**
+   * Creates a copy of the Pixmap.
+   * @returns A new Pixmap with the same dimensions and pixels.
+   */
   copy() {
     const copy = new Pixmap(this.width, this.height);
     copy.pixels.set(this.pixels);
@@ -165,13 +239,23 @@ export class Pixmap {
     return this;
   }
 
-  combinePixels(pixmap: Pixmap) {
-    this.pixels.set(
-      this.pixels.map((el, i) =>
-        pixmap.pixels[i] !== 0 ? pixmap.pixels[i] : el
-      )
-    );
+  /**
+   * Combines the pixels of the Pixmap with another Pixmap, where non-zero
+   * pixels in the overlay Pixmap replace those in the original Pixmap.
+   * @param overlay The Pixmap to combine with.
+   * @returns The original Pixmap with the overlay combined.
+   */
+  combinePixels(overlay: Pixmap): this {
+    if (overlay.width !== this.width || overlay.height !== this.height) {
+      throw new Error("Cannot merge pixmaps of different dimensions.");
+    }
 
+    const len = this.pixels.length;
+    for (let i = 0; i < len; i++) {
+      if (overlay.pixels[i] !== 0) {
+        this.pixels[i] = overlay.pixels[i];
+      }
+    }
     return this;
   }
 }
