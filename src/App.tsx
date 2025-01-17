@@ -25,31 +25,32 @@ function App() {
   const [state, dispatch] = useReducer(stateReducer, initializeState());
   return (
     <div className={styles.app}>
-      <div className={styles.middle}>
+      <div className={styles.left}>
         <ToolBar tools={TOOLS} state={state} dispatch={dispatch} />
-        <div>
-          <PixmapCanvas
-            layers={state.layers}
-            onMouseDown={(e) => {
-              dispatch({
-                type: "mousedown",
-                startPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
-                lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
-              });
-            }}
-            onMouseUp={() => {
-              dispatch({ type: "mouseup" });
-            }}
-            onMouseMove={(e) => {
-              dispatch({
-                type: "mousemove",
-                lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
-              });
-            }}
-          />
-          <ColorBar state={state} dispatch={dispatch} />
-        </div>
       </div>
+      <div className={styles.middle}>
+        <PixmapCanvas
+          layers={state.layers}
+          onMouseDown={(e) => {
+            dispatch({
+              type: "mousedown",
+              startPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+            });
+          }}
+          onMouseUp={() => {
+            dispatch({ type: "mouseup" });
+          }}
+          onMouseMove={(e) => {
+            dispatch({
+              type: "mousemove",
+              lastPos: [e.nativeEvent.offsetX, e.nativeEvent.offsetY],
+            });
+          }}
+        />
+        <ColorBar state={state} dispatch={dispatch} />
+      </div>
+      <div className={styles.right}></div>
     </div>
   );
 }

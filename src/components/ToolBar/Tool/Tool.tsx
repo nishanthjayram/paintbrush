@@ -3,6 +3,8 @@ import styles from "./Tool.module.css";
 import { TTool } from "../../../constants";
 import { TReducerState } from "../../../types";
 
+import ColorEraserSVG from "../../../assets/icons/tools/colorEraser.svg?react";
+import EraserSVG from "../../../assets/icons/tools/eraser.svg?react";
 import FillSVG from "../../../assets/icons/tools/fill.svg?react";
 import PenSVG from "../../../assets/icons/tools/pen.svg?react";
 import BezierSVG from "../../../assets/icons/tools/bezier.svg?react";
@@ -20,6 +22,8 @@ const toolToSVGMap: Record<
   TTool,
   React.FunctionComponent<React.SVGProps<SVGSVGElement>>
 > = {
+  colorEraser: ColorEraserSVG,
+  eraser: EraserSVG,
   fill: FillSVG,
   pen: PenSVG,
   bezier: BezierSVG,

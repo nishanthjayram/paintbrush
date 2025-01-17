@@ -1,3 +1,4 @@
+import { CORNER_RADIUS_MULTIPLIER } from "../constants";
 import { TState, TStateAction } from "../types";
 import { getMidpoint } from "./getMidpoint";
 
@@ -97,6 +98,59 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
                 ),
             },
           };
+        case "roundedRectangle": {
+          // Calculate dimensions
+          const width = Math.abs(action.lastPos[0] - state.lastPos[0]);
+          const height = Math.abs(action.lastPos[1] - state.lastPos[1]);
+
+          // Calculate corner radius
+          const radius = Math.floor(
+            Math.min(width, height) * CORNER_RADIUS_MULTIPLIER
+          );
+
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawRoundedRectangle(
+                  state.lastPos,
+                  action.lastPos,
+                  radius,
+                  state.fillColor
+                ),
+            },
+          };
+        }
+        case "filledRoundedRectangle": {
+          // Calculate dimensions
+          const width = Math.abs(action.lastPos[0] - state.lastPos[0]);
+          const height = Math.abs(action.lastPos[1] - state.lastPos[1]);
+
+          // Calculate corner radius
+          const radius = Math.floor(
+            Math.min(width, height) * CORNER_RADIUS_MULTIPLIER
+          );
+
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledRoundedRectangle(
+                  state.lastPos,
+                  action.lastPos,
+                  radius,
+                  state.fillColor,
+                  state.borderColor
+                ),
+            },
+          };
+        }
         case "ellipse":
           return {
             ...state,

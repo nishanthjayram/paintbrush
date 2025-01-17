@@ -1,7 +1,6 @@
 import { BitSet } from "./classes/BitSet";
 import { TPos } from "./types";
-import { getEllipse, getLine } from "./utils/shapes";
-
+import { getEllipse, getLine, getRoundedRect } from "./utils/shapes";
 export class Pixmap {
   readonly pixels: Uint8ClampedArray;
   readonly width: number;
@@ -172,6 +171,91 @@ export class Pixmap {
       for (let i = x0 - x; i <= x0 + x; i++) {
         const pos: TPos = [i, y0 + y];
         if (this.getPixel(pos) !== borderColor) this.setPixel(pos, fillColor);
+      }
+    }
+
+    return this;
+  }
+
+  /**
+   * Draws a rounded rectangle.
+   * @param start The top-left position [x0, y0].
+   * @param end The bottom-right position [x1, y1].
+   * @param radius The corner radius.
+   * @param borderColor The color of the rectangle border.
+   * @param thickness The thickness of the stroke.
+   * @returns The original Pixmap with the rounded rectangle.
+   */
+  drawRoundedRectangle(
+    start: TPos,
+    end: TPos,
+    radius: number,
+    borderColor: number,
+    thickness: number = 1
+  ): this {
+    for (const pos of getRoundedRect(start, end, radius, thickness)) {
+      if (!this.checkPos(pos)) continue;
+      const index = this.posToIndex(pos);
+      if (!this.visited.check(index)) {
+        this.setPixel(pos, borderColor);
+        this.visited.set(index);
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Draws a filled rounded rectangle.
+   * @param start The top-left position [x0, y0]
+   * @param end The bottom-right position [x1, y1]
+   * @param radius The corner radius
+   * @param fillColor The color to fill the rectangle with
+   * @param borderColor The color of the rectangle border
+   * @returns The original Pixmap with the filled rounded rectangle
+   */
+  drawFilledRoundedRectangle(
+    start: TPos,
+    end: TPos,
+    radius: number,
+    fillColor: number,
+    borderColor: number
+  ): this {
+    const [x0, y0] = start;
+    const [x1, y1] = end;
+    const [xMin, xMax] = x0 < x1 ? [x0, x1] : [x1, x0];
+    const [yMin, yMax] = y0 < y1 ? [y0, y1] : [y1, y0];
+
+    // Adjust radius if too large
+    const maxRadius = Math.min((xMax - xMin) / 2, (yMax - yMin) / 2);
+    radius = Math.min(radius, maxRadius);
+
+    // Draw border
+    this.drawRoundedRectangle(start, end, radius, borderColor);
+
+    // Fill interior
+    for (let y = yMin + 1; y < yMax; y++) {
+      let xStart = xMin + 1;
+      let xEnd = xMax - 1;
+
+      // Adjust start/end for rounded corners
+      if (y < yMin + radius) {
+        const dy = radius - (y - yMin);
+        const dx = Math.floor(Math.sqrt(radius * radius - dy * dy));
+        xStart += radius - dx;
+        xEnd -= radius - dx;
+      } else if (y > yMax - radius) {
+        const dy = radius - (yMax - y);
+        const dx = Math.floor(Math.sqrt(radius * radius - dy * dy));
+        xStart += radius - dx;
+        xEnd -= radius - dx;
+      }
+
+      // Fill row
+      for (let x = xStart; x <= xEnd; x++) {
+        const pos: TPos = [x, y];
+        if (this.getPixel(pos) !== borderColor) {
+          this.setPixel(pos, fillColor);
+        }
       }
     }
 
