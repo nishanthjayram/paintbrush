@@ -1,0 +1,10 @@
+.tool {
+  width: 30px;
+  aspect-ratio: 65 / 73;
+  margin: 0.5px;
+  background-color: #ffffff;
+}
+
+.active {
+  filter: invert(100%);
+}

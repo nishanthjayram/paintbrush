@@ -4,6 +4,9 @@ import { Pixmap } from "./Pixmap";
 import PixmapCanvas from "./components/PixmapCanvas/PixmapCanvas";
 import { TState } from "./types";
 import { stateReducer } from "./utils/stateReducer";
+import ColorBar from "./components/ColorBar/ColorBar";
+import { COLOR_PALETTE, TOOLS } from "./constants";
+import ToolBar from "./components/ToolBar/ToolBar";
 
 const initializeState = (): TState => ({
   layers: {
@@ -13,13 +16,19 @@ const initializeState = (): TState => ({
   isDrawing: false,
   lastPos: null,
   tool: "pen",
+  palette: COLOR_PALETTE,
+  fillColor: 15,
+  borderColor: 1,
 });
 
 function App() {
   const [state, dispatch] = useReducer(stateReducer, initializeState());
   return (
     <div className={styles.app}>
-      <div className={styles.canvasWrapper}>
+      <div className={styles.left}>
+        <ToolBar tools={TOOLS} state={state} dispatch={dispatch} />
+      </div>
+      <div className={styles.middle}>
         <PixmapCanvas
           layers={state.layers}
           onMouseDown={(e) => {
@@ -39,23 +48,9 @@ function App() {
             });
           }}
         />
+        <ColorBar state={state} dispatch={dispatch} />
       </div>
-      <div>
-        <button
-          onClick={() => {
-            dispatch({ type: "setTool", payload: "pen" });
-          }}
-        >
-          {state.tool === "pen" ? "Pen (selected)" : "Pen"}
-        </button>
-        <button
-          onClick={() => {
-            dispatch({ type: "setTool", payload: "line" });
-          }}
-        >
-          {state.tool === "line" ? "Line (selected)" : "Line"}
-        </button>
-      </div>
+      <div className={styles.right}></div>
     </div>
   );
 }

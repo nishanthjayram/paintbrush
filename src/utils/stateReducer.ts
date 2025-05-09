@@ -1,13 +1,28 @@
+import { CORNER_RADIUS_MULTIPLIER } from "../constants";
 import { TState, TStateAction } from "../types";
+import { getMidpoint } from "./getMidpoint";
 
 export const stateReducer = (state: TState, action: TStateAction): TState => {
   switch (action.type) {
     case "mousedown":
-      return {
-        ...state,
-        isDrawing: true,
-        lastPos: action.lastPos,
-      };
+      switch (state.tool) {
+        case "fill":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .fill(action.lastPos, state.fillColor),
+            },
+          };
+        default:
+          return {
+            ...state,
+            isDrawing: true,
+            lastPos: action.lastPos,
+          };
+      }
     case "mousemove":
       if (!state.isDrawing || !state.lastPos) return state;
       switch (state.tool) {
@@ -18,7 +33,29 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               ...state.layers,
               main: state.layers.main
                 .copy()
-                .drawLine(...state.lastPos, ...action.lastPos),
+                .drawLine(state.lastPos, action.lastPos, state.fillColor),
+            },
+            lastPos: action.lastPos,
+          };
+        case "eraser":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .erase(state.lastPos, action.lastPos),
+            },
+            lastPos: action.lastPos,
+          };
+        case "colorEraser":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              main: state.layers.main
+                .copy()
+                .erase(state.lastPos, action.lastPos, state.fillColor),
             },
             lastPos: action.lastPos,
           };
@@ -30,7 +67,133 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
               preview: state.layers.preview
                 .copy()
                 .clear()
-                .drawLine(...state.lastPos, ...action.lastPos),
+                .drawLine(state.lastPos, action.lastPos, state.fillColor),
+            },
+          };
+        case "rectangle": {
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawRectangle(state.lastPos, action.lastPos, state.fillColor),
+            },
+          };
+        }
+        case "filledRectangle":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledRectangle(
+                  state.lastPos,
+                  action.lastPos,
+                  state.fillColor,
+                  state.borderColor
+                ),
+            },
+          };
+        case "roundedRectangle": {
+          // Calculate dimensions
+          const width = Math.abs(action.lastPos[0] - state.lastPos[0]);
+          const height = Math.abs(action.lastPos[1] - state.lastPos[1]);
+
+          // Calculate corner radius
+          const radius = Math.floor(
+            Math.min(width, height) * CORNER_RADIUS_MULTIPLIER
+          );
+
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawRoundedRectangle(
+                  state.lastPos,
+                  action.lastPos,
+                  radius,
+                  state.fillColor
+                ),
+            },
+          };
+        }
+        case "filledRoundedRectangle": {
+          // Calculate dimensions
+          const width = Math.abs(action.lastPos[0] - state.lastPos[0]);
+          const height = Math.abs(action.lastPos[1] - state.lastPos[1]);
+
+          // Calculate corner radius
+          const radius = Math.floor(
+            Math.min(width, height) * CORNER_RADIUS_MULTIPLIER
+          );
+
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledRoundedRectangle(
+                  state.lastPos,
+                  action.lastPos,
+                  radius,
+                  state.fillColor,
+                  state.borderColor
+                ),
+            },
+          };
+        }
+        case "ellipse":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawEllipse(
+                  getMidpoint(state.lastPos, action.lastPos),
+                  [
+                    Math.floor(
+                      Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
+                    ),
+                    Math.floor(
+                      Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
+                    ),
+                  ],
+                  state.fillColor
+                ),
+            },
+          };
+        case "filledEllipse":
+          return {
+            ...state,
+            layers: {
+              ...state.layers,
+              preview: state.layers.preview
+                .copy()
+                .clear()
+                .drawFilledEllipse(
+                  getMidpoint(state.lastPos, action.lastPos),
+                  [
+                    Math.floor(
+                      Math.abs(action.lastPos[0] - state.lastPos[0]) / 2
+                    ),
+                    Math.floor(
+                      Math.abs(action.lastPos[1] - state.lastPos[1]) / 2
+                    ),
+                  ],
+                  state.fillColor,
+                  state.borderColor
+                ),
             },
           };
         default:
@@ -51,6 +214,21 @@ export const stateReducer = (state: TState, action: TStateAction): TState => {
       return {
         ...state,
         tool: action.payload,
+      };
+    case "setPalette":
+      return {
+        ...state,
+        palette: action.payload,
+      };
+    case "setFillColor":
+      return {
+        ...state,
+        fillColor: action.payload,
+      };
+    case "setBorderColor":
+      return {
+        ...state,
+        borderColor: action.payload,
       };
     default:
       return state;
